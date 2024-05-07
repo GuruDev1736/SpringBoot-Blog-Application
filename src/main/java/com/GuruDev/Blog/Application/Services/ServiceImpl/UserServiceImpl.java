@@ -5,8 +5,9 @@ import com.GuruDev.Blog.Application.Model.User;
 import com.GuruDev.Blog.Application.Payloads.UserDTO;
 import com.GuruDev.Blog.Application.Repository.UserRepo;
 import com.GuruDev.Blog.Application.Services.UserService;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public UserDTO createUser(UserDTO userDTO) {
@@ -30,7 +33,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO updateUser(UserDTO userDTO, Integer userId) {
 
-        User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","id",userId));
+        User user = this.userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
@@ -44,7 +48,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserById(Integer userId) {
 
-        User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","id",userId));
+        User user = this.userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         return this.UsertoUserDTO(user);
     }
@@ -55,39 +60,26 @@ public class UserServiceImpl implements UserService {
         List<User> users = this.userRepo.findAll();
         List<UserDTO> userDTOS = users.stream().map(user -> this.UsertoUserDTO(user)).collect(Collectors.toList());
 
-        return userDTOS ;
+        return userDTOS;
     }
 
     @Override
     public void deleteUser(Integer userId) {
 
-        User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","id",userId));
+        User user = this.userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         this.userRepo.delete(user);
 
     }
 
-    private User DTOtoUser(UserDTO userDTO)
-    {
-        User user = new User();
-        user.setId(userDTO.getId());
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
-        user.setAbout(userDTO.getAbout());
-
-        return user ;
+    private User DTOtoUser(UserDTO userDTO) {
+        User user = this.modelMapper.map(userDTO, User.class);
+        return user;
     }
 
-    private UserDTO UsertoUserDTO(User user)
-    {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setName(user.getName());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setPassword(user.getPassword());
-        userDTO.setAbout(user.getAbout());
-
-        return userDTO ;
+    private UserDTO UsertoUserDTO(User user) {
+        UserDTO userDTO = this.modelMapper.map(user, UserDTO.class);
+        return userDTO;
     }
 }
