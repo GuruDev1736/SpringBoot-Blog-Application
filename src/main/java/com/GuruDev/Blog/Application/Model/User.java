@@ -1,5 +1,8 @@
 package com.GuruDev.Blog.Application.Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,18 +19,21 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id ;
+    private Integer id;
 
-    @Column(name = "name", nullable = false , length = 100)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "email", nullable = false , length = 100 , unique = true)
+    @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false , length = 100)
+    @Column(name = "password", nullable = false, length = 100)
     private String password;
 
-    @Column(name = "about" , nullable = true)
+    @Column(name = "about", nullable = true)
     private String about;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Post> Post = new ArrayList<>();
 
 }
