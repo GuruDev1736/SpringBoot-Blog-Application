@@ -3,6 +3,7 @@ package com.GuruDev.Blog.Application.Services;
 import java.util.List;
 
 import com.GuruDev.Blog.Application.Payloads.PostDTO;
+import com.GuruDev.Blog.Application.Payloads.PostResponse;
 
 public interface PostService {
 
@@ -14,13 +15,13 @@ public interface PostService {
 
     void deleteAllPost();
 
-    List<PostDTO> getAllPost();
+    PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
 
     PostDTO getPostById(Integer postId);
 
-    List<PostDTO> getPostByCategory(Integer categoryId);
+    PostResponse getPostByCategory(Integer categoryId, Integer pageNumber, Integer pageSize);
 
-    List<PostDTO> getPostByUser(Integer userId);
+    PostResponse getPostByUser(Integer userId, Integer pageNumber, Integer pageSize);
 
     List<PostDTO> searchPost(String keyword);
 }
