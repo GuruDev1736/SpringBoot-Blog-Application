@@ -1,7 +1,9 @@
 package com.GuruDev.Blog.Application.Controller;
 
+import java.io.IOException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,14 +14,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.GuruDev.Blog.Application.Config.Constant;
 import com.GuruDev.Blog.Application.Payloads.ApiResponse;
+import com.GuruDev.Blog.Application.Payloads.ImageResponse;
 import com.GuruDev.Blog.Application.Payloads.PostDTO;
 import com.GuruDev.Blog.Application.Payloads.PostResponse;
+import com.GuruDev.Blog.Application.Services.FileService;
 import com.GuruDev.Blog.Application.Services.PostService;
 
 import io.micrometer.core.ipc.http.HttpSender.Response;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import lombok.Getter;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +37,12 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private FileService fileService;
+
+    @Value("${project.image}")
+    private String path;
 
     @PostMapping("/{userId}/{categoryId}")
     public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO, @PathVariable Integer userId,
@@ -102,6 +114,22 @@ public class PostController {
     public ResponseEntity<List<PostDTO>> searchPost(@RequestParam(value = "search", required = true) String keyword) {
         List<PostDTO> postDTOs = this.postService.searchPost(keyword);
         return ResponseEntity.ok(postDTOs);
+    }
+
+    @PostMapping("image/upload/{categoryId}/{postId}")
+    public ResponseEntity<ImageResponse> UploadPostImage(
+            @RequestParam("image") MultipartFile imagFile,
+            @PathVariable int postId,
+            @PathVariable int categoryId) throws IOException {
+
+        String fileName = this.fileService.UploadImage(path, imagFile);
+        PostDTO postDTO = this.postService.getPostById(postId);
+        postDTO.setImageUrl(fileName);
+        PostDTO updatedPost = this.postService.updatePost(postDTO, postId, categoryId);
+
+        return new ResponseEntity<>(new ImageResponse(fileName, "Image Has Successfully Uploaded", true, updatedPost),
+                HttpStatus.CREATED);
+
     }
 
 }
