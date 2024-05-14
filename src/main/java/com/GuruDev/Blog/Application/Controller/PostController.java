@@ -1,11 +1,14 @@
 package com.GuruDev.Blog.Application.Controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,6 +29,7 @@ import com.GuruDev.Blog.Application.Services.PostService;
 
 import io.micrometer.core.ipc.http.HttpSender.Response;
 import jakarta.persistence.criteria.CriteriaBuilder.In;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -118,18 +122,29 @@ public class PostController {
 
     @PostMapping("image/upload/{categoryId}/{postId}")
     public ResponseEntity<ImageResponse> UploadPostImage(
-            @RequestParam("image") MultipartFile imagFile,
+            @RequestParam("image") MultipartFile imageFile,
             @PathVariable int postId,
             @PathVariable int categoryId) throws IOException {
 
-        String fileName = this.fileService.UploadImage(path, imagFile);
         PostDTO postDTO = this.postService.getPostById(postId);
+        String fileName = this.fileService.UploadImage(path, imageFile);
         postDTO.setImageUrl(fileName);
         PostDTO updatedPost = this.postService.updatePost(postDTO, postId, categoryId);
 
         return new ResponseEntity<>(new ImageResponse(fileName, "Image Has Successfully Uploaded", true, updatedPost),
                 HttpStatus.CREATED);
 
+    }
+
+    @GetMapping(value = "/image/{url}" , produces = MediaType.IMAGE_JPEG_VALUE)
+    public void downloadFile(
+            @PathVariable("url") String imageName,
+            HttpServletResponse response) throws IOException {
+
+        InputStream stream = this.fileService.getContent(path, imageName);
+
+        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+        StreamUtils.copy(stream, response.getOutputStream());
     }
 
 }

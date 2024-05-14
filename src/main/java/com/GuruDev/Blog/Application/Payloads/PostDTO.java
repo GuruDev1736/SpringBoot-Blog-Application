@@ -1,8 +1,11 @@
 package com.GuruDev.Blog.Application.Payloads;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.GuruDev.Blog.Application.Model.Categories;
+import com.GuruDev.Blog.Application.Model.Comment;
 import com.GuruDev.Blog.Application.Model.User;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -31,5 +34,7 @@ public class PostDTO {
 
     private CategoryDTO categories;
     private UserDTO user;
+
+    private List<CommentDTO> comments  = new ArrayList<>();
 
 }
