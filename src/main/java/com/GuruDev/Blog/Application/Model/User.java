@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.engine.internal.Cascade;
 
 @Entity
 @Table(name = "users")
@@ -38,6 +39,12 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL , fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user" , referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role",referencedColumnName = "roleId"))
+    private List<Role> roles = new ArrayList<>();
 
 
 }
