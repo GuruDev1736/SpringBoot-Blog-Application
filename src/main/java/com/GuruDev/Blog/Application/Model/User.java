@@ -1,7 +1,7 @@
 package com.GuruDev.Blog.Application.Model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.engine.internal.Cascade;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
@@ -40,11 +43,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL , fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles",
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user" , referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role",referencedColumnName = "roleId"))
-    private List<Role> roles = new ArrayList<>();
-
+            inverseJoinColumns = @JoinColumn(name = "role",referencedColumnName = "id"))
+    private Set<Role> roles = new HashSet<>();
 
 }
