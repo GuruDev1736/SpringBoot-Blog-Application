@@ -2,13 +2,17 @@ package com.GuruDev.Blog.Application.Controller;
 
 
 import com.GuruDev.Blog.Application.Exceptions.InvalidCredentialsException;
+import com.GuruDev.Blog.Application.Exceptions.ResourceNotFoundException;
 import com.GuruDev.Blog.Application.Model.JWTRequest;
 import com.GuruDev.Blog.Application.Model.JWTResponse;
+import com.GuruDev.Blog.Application.Model.User;
 import com.GuruDev.Blog.Application.Payloads.UserDTO;
 import com.GuruDev.Blog.Application.Repository.UserRepo;
 import com.GuruDev.Blog.Application.Security.JwtHelper;
 import com.GuruDev.Blog.Application.Services.UserService;
 import jakarta.validation.Valid;
+
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +40,11 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private UserRepo userRepo ;
 
     @Autowired
     private JwtHelper helper;
@@ -52,9 +62,20 @@ public class AuthController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String token = this.helper.generateToken(userDetails);
 
+        User user = this.userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()-> new ResourceNotFoundException("User", "Email"+userDetails.getUsername(), 0));
+
+        UserDTO userDTO = this.modelMapper.map(user, UserDTO.class);
+
+
         JWTResponse response = JWTResponse.builder()
                 .token(token)
+                .userId(userDTO.getId())
+                .userRole(userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse(""))
                 .userName(userDetails.getUsername()).build();
+                
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

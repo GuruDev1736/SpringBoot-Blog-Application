@@ -1,5 +1,7 @@
 package com.GuruDev.Blog.Application.Model;
 
+import com.GuruDev.Blog.Application.Payloads.UserDTO;
+
 import lombok.*;
 
 @Getter
@@ -12,5 +14,7 @@ public class JWTResponse {
 
     private  String token ;
     private String userName ;
+    private int userId ;
+    private String userRole;
 
 }
