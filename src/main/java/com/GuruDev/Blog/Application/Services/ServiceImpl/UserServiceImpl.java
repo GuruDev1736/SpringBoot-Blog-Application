@@ -4,6 +4,8 @@ import com.GuruDev.Blog.Application.Config.Constant;
 import com.GuruDev.Blog.Application.Exceptions.ResourceNotFoundException;
 import com.GuruDev.Blog.Application.Model.Role;
 import com.GuruDev.Blog.Application.Model.User;
+import com.GuruDev.Blog.Application.Payloads.ApiResponse;
+import com.GuruDev.Blog.Application.Payloads.ChangePassDTO;
 import com.GuruDev.Blog.Application.Payloads.UserDTO;
 import com.GuruDev.Blog.Application.Repository.RoleRepo;
 import com.GuruDev.Blog.Application.Repository.UserRepo;
@@ -27,10 +29,10 @@ public class UserServiceImpl implements UserService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private PasswordEncoder passwordEncoder ;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private RoleRepo roleRepo ;
+    private RoleRepo roleRepo;
 
     @Override
     public UserDTO createUser(UserDTO userDTO) {
@@ -96,5 +98,24 @@ public class UserServiceImpl implements UserService {
     private UserDTO UsertoUserDTO(User user) {
         UserDTO userDTO = this.modelMapper.map(user, UserDTO.class);
         return userDTO;
+    }
+
+    @Override
+    public String changePassword(int userId, ChangePassDTO changePassDTO) {
+
+        User user = this.userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("user", "Id", userId));
+
+        String hashedPassword = user.getPassword();
+
+        if (passwordEncoder.matches(changePassDTO.getOldPassword(), hashedPassword)) {
+            String newHashedPassword = passwordEncoder.encode(changePassDTO.getNewPassword());
+            user.setPassword(newHashedPassword);
+            this.userRepo.save(user);
+            return "Password has been successfully changed";
+        } else {
+            throw new IllegalArgumentException("Old password does not match");
+        }
+
     }
 }

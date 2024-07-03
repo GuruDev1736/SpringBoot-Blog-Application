@@ -1,6 +1,7 @@
 package com.GuruDev.Blog.Application.Controller;
 
 import com.GuruDev.Blog.Application.Payloads.ApiResponse;
+import com.GuruDev.Blog.Application.Payloads.ChangePassDTO;
 import com.GuruDev.Blog.Application.Payloads.UserDTO;
 import com.GuruDev.Blog.Application.Services.UserService;
 import jakarta.validation.Valid;
@@ -22,9 +23,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-
     @PutMapping("/update/{userId}")
-    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO, @PathVariable Integer userId) {
+    public ResponseEntity<UserDTO> updteUser(@Valid @RequestBody UserDTO userDTO, @PathVariable Integer userId) {
         UserDTO updatedUser = this.userService.updateUser(userDTO, userId);
         return ResponseEntity.ok(updatedUser);
     }
@@ -45,5 +45,12 @@ public class UserController {
     public ResponseEntity<UserDTO> getUserById(@PathVariable Integer userId) {
         UserDTO userDTO = this.userService.getUserById(userId);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/changePass/{userId}")
+    public ResponseEntity<ApiResponse> updatePassword(@PathVariable("userId") int id,
+            @RequestBody ChangePassDTO changePassDTO) {
+        this.userService.changePassword(id, changePassDTO);
+        return ResponseEntity.ok(new ApiResponse("Password has Successfully Changed", true));
     }
 }

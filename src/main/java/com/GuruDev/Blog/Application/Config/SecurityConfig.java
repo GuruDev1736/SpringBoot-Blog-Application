@@ -1,6 +1,5 @@
 package com.GuruDev.Blog.Application.Config;
 
-
 import com.GuruDev.Blog.Application.Security.JwtAuthenticationEntryPoint;
 import com.GuruDev.Blog.Application.Security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebSecurity
 @EnableWebMvc
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig  {
+public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationEntryPoint point;
@@ -40,33 +39,29 @@ public class SecurityConfig  {
     @Autowired
     private UserDetailsService userDetailsService;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth ->
-                        auth
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/auth/register").permitAll()
-                                .requestMatchers(HttpMethod.GET).permitAll()
-                                        .anyRequest().authenticated())
-                        .httpBasic(Customizer.withDefaults())
-                        .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
-                        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                        .requestMatchers(HttpMethod.GET).permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(){
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
 
-        return daoAuthenticationProvider ;
+        return daoAuthenticationProvider;
     }
 
     @Bean
