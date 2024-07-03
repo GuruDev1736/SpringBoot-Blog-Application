@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    public ResponseEntity<ApiResponse> InvalidPassword(SQLIntegrityConstraintViolationException e) {
+    public ResponseEntity<ApiResponse> duplicateError(SQLIntegrityConstraintViolationException e) {
         String message = e.getMessage();
         ApiResponse apiResponse = new ApiResponse(message, false);
         return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
