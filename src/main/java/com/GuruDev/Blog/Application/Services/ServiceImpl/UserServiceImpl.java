@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,15 +38,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO createUser(UserDTO userDTO) {
 
+        Optional<User> existingUser = userRepo.findByEmail(userDTO.getEmail());
+        if (existingUser.isPresent()) {
+            throw new ResourceNotFoundException("User", "Email " + userDTO.getEmail() + " already exists.", 0);
+        }
         User user = this.DTOtoUser(userDTO);
+
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
-        Role role = this.roleRepo.findById(Constant.NORMAL_USER).get();
+        Role role = this.roleRepo.findById(Constant.NORMAL_USER)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "Role ID " + Constant.NORMAL_USER + " not found.", 0));
         user.getRoles().add(role);
-
-        User save = this.userRepo.save(user);
-        return this.UsertoUserDTO(save);
+        User savedUser = this.userRepo.save(user);
+        return this.UsertoUserDTO(savedUser);
     }
+
 
     @Override
     public UserDTO updateUser(UserDTO userDTO, Integer userId) {
